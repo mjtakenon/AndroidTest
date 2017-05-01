@@ -44,12 +44,16 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -84,7 +88,27 @@ MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LinearLayout activityLayout = new LinearLayout(this);
+        setContentView(R.layout.activity_main);
+
+        TextView tv = (TextView) findViewById(R.id.debugText);
+        tv.setText("hogehoge");
+
+        // TabHostの初期化および設定処理
+        initTabs();
+
+        ListView lv = (ListView) findViewById(R.id.listView1);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1);
+
+        // 要素の追加
+        adapter.add("a");
+        adapter.add("b");
+        adapter.add("c");
+
+        lv.setAdapter(adapter);
+
+        /*LinearLayout activityLayout = new LinearLayout(this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
@@ -126,10 +150,41 @@ MainActivity extends Activity
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff());
+                .setBackOff(new ExponentialBackOff());*/
     }
 
 
+    protected void initTabs() {
+        try {
+            TabHost tabHost = (TabHost) findViewById(R.id.tabHost1);
+            tabHost.setup();
+            TabHost.TabSpec spec;
+
+            // Tab1
+            spec = tabHost.newTabSpec("Tab1")
+                    .setIndicator("Day", ContextCompat.getDrawable(this,R.drawable.ic_cast_light))
+                    .setContent(R.id.tab1);
+            tabHost.addTab(spec);
+
+            // Tab2
+            spec = tabHost.newTabSpec("Tab2")
+                    .setIndicator("Week", ContextCompat.getDrawable(this, R.drawable.ic_cast_dark))
+                    .setContent(R.id.tab2);
+            tabHost.addTab(spec);
+
+            // Tab3
+            spec = tabHost.newTabSpec("Tab3")
+                    .setIndicator("Month", ContextCompat.getDrawable(this, R.drawable.ic_cast_white))
+                    .setContent(R.id.tab3);
+            tabHost.addTab(spec);
+
+            tabHost.setCurrentTab(0);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Attempt to call the API, after verifying that all the preconditions are
@@ -196,8 +251,7 @@ MainActivity extends Activity
      *     activity result.
      */
     @Override
-    protected void onActivityResult(
-            int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
@@ -242,9 +296,7 @@ MainActivity extends Activity
      *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         EasyPermissions.onRequestPermissionsResult(
                 requestCode, permissions, grantResults, this);
@@ -312,15 +364,13 @@ MainActivity extends Activity
         }
     }
 
-
     /**
      * Display an error dialog showing that Google Play Services is missing
      * or out of date.
      * @param connectionStatusCode code describing the presence (or lack of)
      *     Google Play Services on this device.
      */
-    void showGooglePlayServicesAvailabilityErrorDialog(
-            final int connectionStatusCode) {
+    void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         Dialog dialog = apiAvailability.getErrorDialog(
                 MainActivity.this,
